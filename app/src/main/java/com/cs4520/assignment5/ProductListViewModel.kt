@@ -5,9 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.PeriodicWorkRequest
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkRequest
 import com.cs4520.assignment5.Product
@@ -49,15 +47,18 @@ class ProductListViewModel : ViewModel() {
                     _isLoading.value = false;
                     val products = processData(data)
                     if (products.size == 0) {
+                        Log.d("APIIIIIIII", "0 prods")
                         _productList.value = listOf()
                         _errors.value = "No Products Available"
                     } else {
-                        setdb(products)
+                        Log.d("APIIIIIIII", "Some prods")
+                        //setdb(products)
                         _productList.value = products
                         _errors.value = null;
                     }
                 } else {
                     _isLoading.value = false;
+                    Log.d("APIIIIIIII", "Unknown Error")
                     _errors.value = "Unknown Error";
                     _productList.value = listOf();
                 }
@@ -97,13 +98,12 @@ class ProductListViewModel : ViewModel() {
     }
 
     private fun queueRefreshRequest() {
-        val workRequest: PeriodicWorkRequest = PeriodicWorkRequestBuilder<RefreshData>(1, TimeUnit.HOURS).build()
+        val myWorkRequest: WorkRequest = OneTimeWorkRequestBuilder<RefreshData>()
+            .setInitialDelay(4, TimeUnit.SECONDS)
+            .build()
         val workManager = WorkManagerSingleton.getInstance()
-        workManager.enqueueUniquePeriodicWork(
-            "updateDatabase",
-            ExistingPeriodicWorkPolicy.UPDATE,
-            workRequest
-        )
+        workManager.enqueue(myWorkRequest)
+        Log.d("APIIIIIIII", "sent")
     }
 
 
