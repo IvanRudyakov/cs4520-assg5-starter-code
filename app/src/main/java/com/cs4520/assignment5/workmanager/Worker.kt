@@ -13,6 +13,7 @@ class RefreshData(val context: Context, workerParams: WorkerParameters) : Corout
     override suspend fun doWork(): Result {
         val json = RetrofitClient.instance.fetchDataSuspend();
         val products = processData(json)
+        DatabaseProvider.setContext(context)
         val dao = DatabaseProvider.getDatabase()?.productDao()
         dao?.clearAndInsert(products)
         return Result.success()
